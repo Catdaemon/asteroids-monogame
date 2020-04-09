@@ -70,8 +70,8 @@ namespace monogame_test
             var input = new InputStatus()
             {
                 ForwardAmount = (gamepadState.ThumbSticks.Left.Y > 0 ? gamepadState.ThumbSticks.Left.Y : 0) + (keyboardState.IsKeyDown(Keys.W) ? 1 : 0),
-                BackwardAmount = (gamepadState.ThumbSticks.Left.Y < 0 ? gamepadState.ThumbSticks.Left.Y : 0) + (keyboardState.IsKeyDown(Keys.S) ? 1 : 0),
-                LeftAmount = (gamepadState.ThumbSticks.Left.X < 0 ? gamepadState.ThumbSticks.Left.X : 0) + (keyboardState.IsKeyDown(Keys.A) ? 1 : 0),
+                BackwardAmount = (gamepadState.ThumbSticks.Left.Y < 0 ? gamepadState.ThumbSticks.Left.Y * -1 : 0) + (keyboardState.IsKeyDown(Keys.S) ? 1 : 0),
+                LeftAmount = (gamepadState.ThumbSticks.Left.X < 0 ? gamepadState.ThumbSticks.Left.X * -1 : 0) + (keyboardState.IsKeyDown(Keys.A) ? 1 : 0),
                 RightAmount = (gamepadState.ThumbSticks.Left.X > 0 ? gamepadState.ThumbSticks.Left.X : 0) + (keyboardState.IsKeyDown(Keys.D) ? 1 : 0),
             };
 
