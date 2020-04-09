@@ -18,10 +18,10 @@ namespace monogame_test
 
         public override void CollidesWith(GameObject other)
         {
-            if (other is Ship)
+            if (other is Ship || other is Asteroid)
             {
-                // get pushed
-                this.Velocity = Vector2.Normalize(this.Position - other.Position) * (other.Velocity.Length() * 0.5f);
+                // bounce
+                this.Velocity = Vector2.Normalize(this.Position - other.Position) * (other.Velocity.Length() * 0.8f);
             }
 
             base.CollidesWith(other);
