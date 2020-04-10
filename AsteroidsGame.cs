@@ -14,7 +14,7 @@ namespace monogame_test
         private GamePadState lastGamepadState = new GamePadState();
 
 
-        private SortedSet<GameObject> Objects = new SortedSet<GameObject>(comparer: new DepthComp());
+        private List<GameObject> Objects = new List<GameObject>();
         private HashSet<GameObject> ToRemove = new HashSet<GameObject>();
         private HashSet<GameObject> ToAdd = new HashSet<GameObject>();
 
@@ -30,8 +30,7 @@ namespace monogame_test
             // TODO: Add your initialization logic here
             var Player1Ship = new Ship()
             {
-                Position = new Vector2(100,100),
-                Depth = -1,
+                Position = new Vector2(100, 100),
             };
 
             graphics.PreferredBackBufferWidth = 1024;
@@ -42,7 +41,7 @@ namespace monogame_test
 
             var rand = new Random();
 
-            for(int i=0; i< 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 var asteroid = new Asteroid()
                 {
@@ -59,9 +58,9 @@ namespace monogame_test
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            
+
             // TODO: use this.Content to load your game content here
-            foreach(var o in Objects)
+            foreach (var o in Objects)
             {
                 o.LoadSprite(this.Content);
             }
@@ -78,13 +77,13 @@ namespace monogame_test
                 BackwardAmount = (gamepadState.ThumbSticks.Left.Y < 0 ? gamepadState.ThumbSticks.Left.Y * -1 : 0) + (keyboardState.IsKeyDown(Keys.S) ? 1 : 0),
                 LeftAmount = (gamepadState.ThumbSticks.Left.X < 0 ? gamepadState.ThumbSticks.Left.X * -1 : 0) + (keyboardState.IsKeyDown(Keys.A) ? 1 : 0),
                 RightAmount = (gamepadState.ThumbSticks.Left.X > 0 ? gamepadState.ThumbSticks.Left.X : 0) + (keyboardState.IsKeyDown(Keys.D) ? 1 : 0),
-                Fire = ((gamepadState.Buttons.A > 0 && lastGamepadState.Buttons.A == 0 ) || keyboardState.IsKeyDown(Keys.Space) && !lastKeyboardState.IsKeyDown(Keys.Space))
+                Fire = ((gamepadState.Buttons.A > 0 && lastGamepadState.Buttons.A == 0) || keyboardState.IsKeyDown(Keys.Space) && !lastKeyboardState.IsKeyDown(Keys.Space))
             };
 
-            foreach(var o in Objects)
+            foreach (var o in Objects)
             {
                 // Check for collision with other objects
-                foreach(var other in Objects)
+                foreach (var other in Objects)
                 {
                     if (other == o)
                         continue;
@@ -110,18 +109,17 @@ namespace monogame_test
                 }
                 else
                 {
-                    if (o.Position.X > graphics.PreferredBackBufferWidth || o.Position. X < 0 || o.Position.Y > graphics.PreferredBackBufferHeight || o.Position.Y < 0)
+                    if (o.Position.X > graphics.PreferredBackBufferWidth || o.Position.X < 0 || o.Position.Y > graphics.PreferredBackBufferHeight || o.Position.Y < 0)
                     {
-                        RemoveObject(o);
+                        this.RemoveObject(o);
                     }
                 }
             }
 
             // Update list of objects
 
-            Objects.UnionWith(ToAdd);
-            
-            Objects.ExceptWith(ToRemove);
+            Objects.RemoveAll((GameObject obj) => ToRemove.Contains(obj));
+            Objects.AddRange(ToAdd);
 
             ToAdd.Clear();
             ToRemove.Clear();
@@ -137,13 +135,14 @@ namespace monogame_test
 
         protected override void Draw(GameTime gameTime)
         {
-            if (spriteBatch == null) {
+            if (spriteBatch == null)
+            {
                 return;
             }
             GraphicsDevice.Clear(Color.CornflowerBlue);
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            foreach(var o in Objects)
+            foreach (var o in Objects)
             {
                 o.Draw(spriteBatch);
             }
@@ -152,42 +151,16 @@ namespace monogame_test
             base.Draw(gameTime);
         }
 
-        public void RemoveObject(GameObject obj) {
+
+        public void RemoveObject(GameObject obj)
+        {
             ToRemove.Add(obj);
         }
 
-        public void AddObject(GameObject obj) {
+        public void AddObject(GameObject obj)
+        {
             ToAdd.Add(obj);
             obj.LoadSprite(this.Content);
-        }
-    }
-
-    public class DepthComp: IComparer<GameObject> {
-        public int Compare(GameObject a, GameObject b) {
-            // If the references are the same, returning 0 will dedupe them in the set.
-            if (a == b)
-            {
-                return 0;
-            }
-
-            // Then try depth
-
-            if (a.Depth != b.Depth) {
-                return a.Depth > b.Depth ? 1 : -1;
-            }
-
-            // Then sprite name
-
-            var nameComprare = a.SpriteName.CompareTo(b.SpriteName);
-
-            if (nameComprare != 0) {
-                return nameComprare;
-            }
-
-            // Finally, ID.
-            // We cannot simply return '1' because that breaks the SortedSet.
-            // We also cannot use a proprty which changes, e.g. position.
-            return a.ID.CompareTo(b.ID);            
         }
     }
 }

@@ -17,8 +17,6 @@ namespace monogame_test
         public Vector2 Direction { get; set; } = new Vector2(0, -1);
         public bool Wraps = true;
         public float RotationalVelocity = 0;
-        public Guid ID = Guid.NewGuid();
-        public int Depth = 0;
         
 
         public GameObject(string spriteName, Vector2 size)
