@@ -8,7 +8,7 @@ namespace monogame_test
     public class GameObject
     {
         public string SpriteName { get; set; }
-        public Texture2D Texture { get; set; }
+        public Texture2D? Texture { get; set; }
         public Vector2 Position { get; set; } = new Vector2(0,0);
         public Vector2 Size { get; set; } = new Vector2(0,0);
         public Vector2 Velocity { get; set; } = new Vector2(0,0);
@@ -37,7 +37,13 @@ namespace monogame_test
 
         public virtual void Draw(SpriteBatch batch)
         {
-            batch.Draw(Texture, position: Position, origin: new Vector2(Size.X * 0.5f, Size.Y * 0.5f), rotation: (float)Math.Atan2(Direction.Y, Direction.X));
+            var origin = new Vector2(Size.X * 0.5f, Size.Y * 0.5f);
+            var rotation = (float)Math.Atan2(Direction.Y, Direction.X);
+            
+            if (Texture != null) {
+                // TODO: replace with a not-obsolete call
+                batch.Draw(Texture, position: Position, color: Color.White, origin: origin, rotation: rotation);    }           
+            
             //batch.Draw(Texture, Position);
         }
 

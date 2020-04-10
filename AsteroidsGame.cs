@@ -9,7 +9,7 @@ namespace monogame_test
     public class AsteroidsGame : Game
     {
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        SpriteBatch? spriteBatch;
 
         private List<GameObject> Objects = new List<GameObject>();
         private Ship Player1Ship;
@@ -111,6 +111,9 @@ namespace monogame_test
 
         protected override void Draw(GameTime gameTime)
         {
+            if (spriteBatch == null) {
+                return;
+            }
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
