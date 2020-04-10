@@ -6,7 +6,7 @@ namespace monogame_test
 {
     public class Asteroid : GameObject
     {
-        public Asteroid() : base("asteroid", new Vector2(100,100))
+        public Asteroid(AsteroidsGame Context) : base(Context, "asteroid", new Vector2(100,100))
         {
 
         }
@@ -16,7 +16,7 @@ namespace monogame_test
             content.Load<Texture2D>(SpriteName);
         }
 
-        public override void CollidesWith(AsteroidsGame ctx, GameObject other)
+        public override void CollidesWith(GameObject other)
         {
             if (other is Ship || other is Asteroid)
             {
@@ -25,11 +25,13 @@ namespace monogame_test
             }
             if (other is Bullet)
             {
-                ctx.RemoveObject(this);
-                ctx.RemoveObject(other);
+                this.Remove();
+                other.Remove();
+                GameContext.SpawnAsteroid();
+                GameContext.Score ++;
             }
 
-            base.CollidesWith(ctx, other);
+            base.CollidesWith(other);
         }
     }
 }

@@ -7,9 +7,8 @@ namespace monogame_test
 {
     public class Ship : GameObject
     {
-        public Ship() : base("ship", new Vector2(100,100))
+        public Ship(AsteroidsGame Context) : base(Context, "ship", new Vector2(100,100))
         {
-
         }
 
         public void Load(ContentManager content)
@@ -17,7 +16,7 @@ namespace monogame_test
             content.Load<Texture2D>(SpriteName);
         }
 
-        public override void Update(AsteroidsGame ctx, GameTime gameTime, InputStatus input)
+        public override void Update(GameTime gameTime, InputStatus input)
         {
             var delta = (float)(gameTime.ElapsedGameTime.TotalSeconds);
 
@@ -26,14 +25,13 @@ namespace monogame_test
             this.AddVelocity((input.ForwardAmount - input.BackwardAmount) * delta * 100);
 
             if (input.Fire) {
-                var bullet = new Bullet(this, 500);
-                ctx.AddObject(bullet);
+                new Bullet(GameContext, this, 500);
             }
 
-            base.Update(ctx, gameTime, input);
+            base.Update(gameTime, input);
         }
 
-        public override void CollidesWith(AsteroidsGame ctx, GameObject other)
+        public override void CollidesWith(GameObject other)
         {
             if (other is Asteroid)
             {
@@ -41,7 +39,7 @@ namespace monogame_test
                 this.Velocity = Vector2.Normalize(this.Position - other.Position) * (this.Velocity.Length() * 0.5f);
             }
 
-            base.CollidesWith(ctx, other);
+            base.CollidesWith(other);
         }
     }
 }

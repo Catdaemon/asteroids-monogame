@@ -8,15 +8,20 @@ namespace monogame_test
 {
     public class AsteroidsGame : Game
     {
-        GraphicsDeviceManager graphics;
         SpriteBatch? spriteBatch;
+        GraphicsDeviceManager graphics;
+        
         private KeyboardState lastKeyboardState = new KeyboardState();
         private GamePadState lastGamepadState = new GamePadState();
-
 
         private List<GameObject> Objects = new List<GameObject>();
         private HashSet<GameObject> ToRemove = new HashSet<GameObject>();
         private HashSet<GameObject> ToAdd = new HashSet<GameObject>();
+
+        public int Score = 0;
+
+        public static int GameWidth = 1024;
+        public static int GameHeight = 768;
 
         public AsteroidsGame()
         {
@@ -28,31 +33,32 @@ namespace monogame_test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            var Player1Ship = new Ship()
+            graphics.PreferredBackBufferWidth = GameWidth;
+            graphics.PreferredBackBufferHeight = GameHeight;
+            graphics.ApplyChanges();
+
+            var Player1Ship = new Ship(this)
             {
                 Position = new Vector2(100, 100),
             };
 
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
-            graphics.ApplyChanges();
-
-            Objects.Add(Player1Ship);
-
-            var rand = new Random();
-
             for (int i = 0; i < 5; i++)
             {
-                var asteroid = new Asteroid()
-                {
-                    Position = new Vector2(rand.Next(0, graphics.PreferredBackBufferWidth), rand.Next(0, graphics.PreferredBackBufferHeight)),
-                    Velocity = new Vector2(rand.Next(-10, 10), rand.Next(-10, 10)),
-                    RotationalVelocity = rand.Next(-10, 10)
-                };
-                Objects.Add(asteroid);
+                SpawnAsteroid();
             }
 
             base.Initialize();
+        }
+
+        public void SpawnAsteroid()
+        {
+            var rand = new Random();
+            var asteroid = new Asteroid(this)
+            {
+                Position = new Vector2(rand.Next(0, graphics.PreferredBackBufferWidth), rand.Next(0, graphics.PreferredBackBufferHeight)),
+                Velocity = new Vector2(rand.Next(-10, 10), rand.Next(-10, 10)),
+                RotationalVelocity = rand.Next(-10, 10)
+            };
         }
 
         protected override void LoadContent()
@@ -90,30 +96,11 @@ namespace monogame_test
 
                     if (new Rectangle(o.Position.ToPoint(), o.Size.ToPoint()).Intersects(new Rectangle(other.Position.ToPoint(), other.Size.ToPoint())))
                     {
-                        o.CollidesWith(this, other);
+                        o.CollidesWith(other);
                     }
                 }
 
-                o.Update(this, gameTime, input);
-
-                if (o.Wraps)
-                {
-                    if (o.Position.X > graphics.PreferredBackBufferWidth)
-                        o.Position = new Vector2(0f, o.Position.Y);
-                    if (o.Position.X < 0)
-                        o.Position = new Vector2(graphics.PreferredBackBufferWidth, o.Position.Y);
-                    if (o.Position.Y > graphics.PreferredBackBufferHeight)
-                        o.Position = new Vector2(o.Position.X, 0);
-                    if (o.Position.Y < 0)
-                        o.Position = new Vector2(o.Position.X, graphics.PreferredBackBufferHeight);
-                }
-                else
-                {
-                    if (o.Position.X > graphics.PreferredBackBufferWidth || o.Position.X < 0 || o.Position.Y > graphics.PreferredBackBufferHeight || o.Position.Y < 0)
-                    {
-                        this.RemoveObject(o);
-                    }
-                }
+                o.Update(gameTime, input);
             }
 
             // Update list of objects
