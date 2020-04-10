@@ -17,18 +17,23 @@ namespace monogame_test
             content.Load<Texture2D>(SpriteName);
         }
 
-        public override void Update(GameTime gameTime, InputStatus input)
+        public override void Update(AsteroidsGame ctx, GameTime gameTime, InputStatus input)
         {
             var delta = (float)(gameTime.ElapsedGameTime.TotalSeconds);
 
             RotationalVelocity += (-input.LeftAmount + input.RightAmount) * delta;            
-
+            
             this.AddVelocity((input.ForwardAmount - input.BackwardAmount) * delta * 100);
 
-            base.Update(gameTime, input);
+            if (input.Fire) {
+                var bullet = new Bullet(this, 500);
+                ctx.AddObject(bullet);
+            }
+
+            base.Update(ctx, gameTime, input);
         }
 
-        public override void CollidesWith(GameObject other)
+        public override void CollidesWith(AsteroidsGame ctx, GameObject other)
         {
             if (other is Asteroid)
             {
@@ -36,7 +41,7 @@ namespace monogame_test
                 this.Velocity = Vector2.Normalize(this.Position - other.Position) * (this.Velocity.Length() * 0.5f);
             }
 
-            base.CollidesWith(other);
+            base.CollidesWith(ctx, other);
         }
     }
 }

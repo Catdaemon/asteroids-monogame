@@ -16,15 +16,20 @@ namespace monogame_test
             content.Load<Texture2D>(SpriteName);
         }
 
-        public override void CollidesWith(GameObject other)
+        public override void CollidesWith(AsteroidsGame ctx, GameObject other)
         {
             if (other is Ship || other is Asteroid)
             {
                 // bounce
                 this.Velocity = Vector2.Normalize(this.Position - other.Position) * (other.Velocity.Length() * 0.8f);
             }
+            if (other is Bullet)
+            {
+                ctx.RemoveObject(this);
+                ctx.RemoveObject(other);
+            }
 
-            base.CollidesWith(other);
+            base.CollidesWith(ctx, other);
         }
     }
 }
