@@ -8,11 +8,20 @@ namespace monogame_test
 {
     public class AsteroidsGame : Game
     {
+        SpriteBatch? spriteBatch;
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        
+        private KeyboardState lastKeyboardState = new KeyboardState();
+        private GamePadState lastGamepadState = new GamePadState();
 
         private List<GameObject> Objects = new List<GameObject>();
-        private Ship Player1Ship;
+        private HashSet<GameObject> ToRemove = new HashSet<GameObject>();
+        private HashSet<GameObject> ToAdd = new HashSet<GameObject>();
+
+        public int Score = 0;
+
+        public static int GameWidth = 1024;
+        public static int GameHeight = 768;
 
         public AsteroidsGame()
         {
@@ -24,31 +33,32 @@ namespace monogame_test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Player1Ship = new Ship()
-            {
-                Position = new Vector2(100,100)
-            };
-
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
+            graphics.PreferredBackBufferWidth = GameWidth;
+            graphics.PreferredBackBufferHeight = GameHeight;
             graphics.ApplyChanges();
 
-            Objects.Add(Player1Ship);
-
-            var rand = new Random();
-
-            for(int i=0; i< 5; i++)
+            var Player1Ship = new Ship(this)
             {
-                var asteroid = new Asteroid()
-                {
-                    Position = new Vector2(rand.Next(0, graphics.PreferredBackBufferWidth), rand.Next(0, graphics.PreferredBackBufferHeight)),
-                    Velocity = new Vector2(rand.Next(-10, 10), rand.Next(-10, 10)),
-                    RotationalVelocity = rand.Next(-10, 10)
-                };
-                Objects.Add(asteroid);
+                Position = new Vector2(100, 100),
+            };
+
+            for (int i = 0; i < 5; i++)
+            {
+                SpawnAsteroid();
             }
 
             base.Initialize();
+        }
+
+        public void SpawnAsteroid()
+        {
+            var rand = new Random();
+            var asteroid = new Asteroid(this)
+            {
+                Position = new Vector2(rand.Next(0, graphics.PreferredBackBufferWidth), rand.Next(0, graphics.PreferredBackBufferHeight)),
+                Velocity = new Vector2(rand.Next(-10, 10), rand.Next(-10, 10)),
+                RotationalVelocity = rand.Next(-10, 10)
+            };
         }
 
         protected override void LoadContent()
@@ -56,7 +66,7 @@ namespace monogame_test
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            foreach(var o in Objects)
+            foreach (var o in Objects)
             {
                 o.LoadSprite(this.Content);
             }
@@ -73,12 +83,13 @@ namespace monogame_test
                 BackwardAmount = (gamepadState.ThumbSticks.Left.Y < 0 ? gamepadState.ThumbSticks.Left.Y * -1 : 0) + (keyboardState.IsKeyDown(Keys.S) ? 1 : 0),
                 LeftAmount = (gamepadState.ThumbSticks.Left.X < 0 ? gamepadState.ThumbSticks.Left.X * -1 : 0) + (keyboardState.IsKeyDown(Keys.A) ? 1 : 0),
                 RightAmount = (gamepadState.ThumbSticks.Left.X > 0 ? gamepadState.ThumbSticks.Left.X : 0) + (keyboardState.IsKeyDown(Keys.D) ? 1 : 0),
+                Fire = ((gamepadState.Buttons.A > 0 && lastGamepadState.Buttons.A == 0) || keyboardState.IsKeyDown(Keys.Space) && !lastKeyboardState.IsKeyDown(Keys.Space))
             };
 
-            foreach(var o in Objects)
+            foreach (var o in Objects)
             {
                 // Check for collision with other objects
-                foreach(var other in Objects)
+                foreach (var other in Objects)
                 {
                     if (other == o)
                         continue;
@@ -90,38 +101,53 @@ namespace monogame_test
                 }
 
                 o.Update(gameTime, input);
-
-                if (o.Position.X > graphics.PreferredBackBufferWidth)
-                    o.Position = new Vector2(0f, o.Position.Y);
-                if (o.Position.X < 0)
-                    o.Position = new Vector2(graphics.PreferredBackBufferWidth, o.Position.Y);
-                if (o.Position.Y > graphics.PreferredBackBufferHeight)
-                    o.Position = new Vector2(o.Position.X, 0);
-                if (o.Position.Y < 0)
-                    o.Position = new Vector2(o.Position.X, graphics.PreferredBackBufferHeight);
             }
+
+            // Update list of objects
+
+            Objects.RemoveAll((GameObject obj) => ToRemove.Contains(obj));
+            Objects.AddRange(ToAdd);
+
+            ToAdd.Clear();
+            ToRemove.Clear();
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            lastKeyboardState = keyboardState;
+            lastGamepadState = gamepadState;
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            if (spriteBatch == null)
+            {
+                return;
+            }
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            foreach(var o in Objects)
+            foreach (var o in Objects)
             {
                 o.Draw(spriteBatch);
             }
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+
+        public void RemoveObject(GameObject obj)
+        {
+            ToRemove.Add(obj);
+        }
+
+        public void AddObject(GameObject obj)
+        {
+            ToAdd.Add(obj);
+            obj.LoadSprite(this.Content);
         }
     }
 }

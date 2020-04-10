@@ -7,9 +7,8 @@ namespace monogame_test
 {
     public class Ship : GameObject
     {
-        public Ship() : base("ship", new Vector2(100,100))
+        public Ship(AsteroidsGame Context) : base(Context, "ship", new Vector2(100,100))
         {
-
         }
 
         public void Load(ContentManager content)
@@ -22,8 +21,12 @@ namespace monogame_test
             var delta = (float)(gameTime.ElapsedGameTime.TotalSeconds);
 
             RotationalVelocity += (-input.LeftAmount + input.RightAmount) * delta;            
-
+            
             this.AddVelocity((input.ForwardAmount - input.BackwardAmount) * delta * 100);
+
+            if (input.Fire) {
+                new Bullet(GameContext, this, 500);
+            }
 
             base.Update(gameTime, input);
         }
